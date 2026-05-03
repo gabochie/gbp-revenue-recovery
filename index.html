@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MapRank™ — Recover Lost Customers from Google Maps</title>
+  <meta name="description" content="I identify and fix hidden issues in your Google Business Profile that are costing you calls, leads, and revenue every day." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,700;0,9..144,900;1,9..144,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --teal-deep:   #0d3d38;
+      --teal-mid:    #1a6b5e;
+      --teal-bright: #2aab91;
+      --teal-light:  #7dd4c4;
+      --teal-pale:   #e6f7f4;
+      --teal-glow:   rgba(42,171,145,0.18);
+      --cream:       #faf8f3;
+      --ink:         #111714;
+      --ink-soft:    #3d4f4a;
+      --ink-muted:   #7a9490;
+      --border:      rgba(13,61,56,0.12);
+      --white:       #ffffff;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--cream);
+      color: var(--ink);
+      font-size: 17px;
+      line-height: 1.65;
+      overflow-x: hidden;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      padding: 1.1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(250,248,243,0.93);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo {
+      font-family: 'Fraunces', serif;
+      font-weight: 900;
+      font-size: 1.3rem;
+      color: var(--teal-deep);
+      text-decoration: none;
+      letter-spacing: -0.02em;
+    }
+
+    .logo sup {
+      font-size: 0.45em;
+      font-weight: 700;
+      vertical-align: super;
+      color: var(--teal-bright);
+      font-family: 'DM Sans', sans-serif;
+      letter-spacing: 0.04em;
+    }
+
+    .nav-cta {
+      background: var(--teal-mid);
+      color: #fff;
+      border: none;
+      padding: 0.6rem 1.4rem;
+      border-radius: 6px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.88rem;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.2s, transform 0.15s;
+    }
+
+    .nav-cta:hover { background: var(--teal-bright); transform: translateY(-1px); }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      padding: 9rem 2rem 5rem;
+      background: var(--teal-deep);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* tropical leaf texture via CSS */
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 60% 60% at 90% 10%, rgba(42,171,145,0.25) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 50% at 10% 90%, rgba(42,171,145,0.15) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    /* decorative ring */
+    .hero::after {
+      content: '';
+      position: absolute;
+      right: -15vw;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 60vw;
+      height: 60vw;
+      border: 1.5px solid rgba(42,171,145,0.2);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .hero-inner {
+      max-width: 800px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(42,171,145,0.2);
+      color: var(--teal-light);
+      padding: 0.35rem 0.9rem;
+      border-radius: 100px;
+      border: 1px solid rgba(125,212,196,0.3);
+      font-size: 0.78rem;
+      font-weight: 500;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      margin-bottom: 2rem;
+      animation: fadeUp 0.7s ease both;
+    }
+
+    .dot {
+      width: 7px; height: 7px;
+      background: var(--teal-bright);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(1.5); }
+    }
+
+    h1 {
+      font-family: 'Fraunces', serif;
+      font-size: clamp(2.6rem, 6.5vw, 4.6rem);
+      font-weight: 900;
+      line-height: 1.04;
+      letter-spacing: -0.03em;
+      color: var(--white);
+      margin-bottom: 1.6rem;
+      animation: fadeUp 0.7s 0.1s ease both;
+    }
+
+    h1 em {
+      font-style: italic;
+      font-weight: 400;
+      color: var(--teal-bright);
+    }
+
+    .hero-sub {
+      font-size: 1.1rem;
+      color: rgba(255,255,255,0.7);
+      max-width: 520px;
+      margin-bottom: 2.5rem;
+      font-weight: 300;
+      line-height: 1.7;
+      animation: fadeUp 0.7s 0.2s ease both;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      align-items: center;
+      animation: fadeUp 0.7s 0.3s ease both;
+    }
+
+    .btn-primary {
+      background: var(--teal-bright);
+      color: var(--teal-deep);
+      padding: 1rem 2rem;
+      border: none;
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.97rem;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+      box-shadow: 0 4px 24px rgba(42,171,145,0.4);
+    }
+
+    .btn-primary:hover {
+      background: var(--teal-light);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(42,171,145,0.5);
+    }
+
+    .hero-note {
+      font-size: 0.82rem;
+      color: rgba(255,255,255,0.4);
+      font-style: italic;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(22px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── ABOUT STRIP ── */
+    .about-strip {
+      background: var(--teal-pale);
+      border-bottom: 1px solid var(--border);
+      padding: 2.5rem 2rem;
+    }
+
+    .about-strip-inner {
+      max-width: 860px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .avatar {
+      width: 58px;
+      height: 58px;
+      background: var(--teal-mid);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      flex-shrink: 0;
+      border: 2px solid var(--teal-bright);
+    }
+
+    .about-text {
+      font-size: 0.95rem;
+      color: var(--ink-soft);
+      font-weight: 300;
+      line-height: 1.6;
+    }
+
+    .about-text strong {
+      color: var(--teal-deep);
+      font-weight: 500;
+    }
+
+    /* ── STATS BAR ── */
+    .stats-bar {
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      padding: 3rem 2rem;
+    }
+
+    .stats-inner {
+      max-width: 860px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+      text-align: center;
+    }
+
+    .stat-num {
+      font-family: 'Fraunces', serif;
+      font-size: 2.6rem;
+      font-weight: 900;
+      color: var(--teal-mid);
+      line-height: 1;
+      margin-bottom: 0.4rem;
+    }
+
+    .stat-label {
+      font-size: 0.84rem;
+      color: var(--ink-muted);
+      font-weight: 300;
+      line-height: 1.5;
+    }
+
+    /* ── SECTIONS ── */
+    section { padding: 5.5rem 2rem; }
+
+    .section-inner { max-width: 860px; margin: 0 auto; }
+
+    .section-tag {
+      font-size: 0.73rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--teal-mid);
+      margin-bottom: 1rem;
+    }
+
+    h2 {
+      font-family: 'Fraunces', serif;
+      font-size: clamp(1.9rem, 4vw, 2.9rem);
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      margin-bottom: 1.4rem;
+    }
+
+    h2 em { font-style: italic; font-weight: 400; color: var(--teal-mid); }
+
+    p { margin-bottom: 1rem; }
+
+    /* ── PROBLEM ── */
+    .problem { background: var(--teal-pale); }
+
+    .problem-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-top: 2.5rem;
+    }
+
+    .problem-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.8rem;
+      position: relative;
+      overflow: hidden;
+      transition: box-shadow 0.2s, transform 0.2s;
+    }
+
+    .problem-card:hover {
+      box-shadow: 0 8px 30px rgba(13,61,56,0.1);
+      transform: translateY(-2px);
+    }
+
+    .problem-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 3px;
+      height: 100%;
+      background: var(--teal-bright);
+    }
+
+    .problem-icon {
+      font-size: 1.6rem;
+      margin-bottom: 0.8rem;
+    }
+
+    .problem-card h3 {
+      font-family: 'Fraunces', serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 0.4rem;
+    }
+
+    .problem-card p {
+      font-size: 0.88rem;
+      color: var(--ink-soft);
+      margin: 0;
+      font-weight: 300;
+    }
+
+    /* ── REFRAME ── */
+    .reframe-box {
+      background: var(--teal-deep);
+      color: var(--white);
+      border-radius: 18px;
+      padding: 3.5rem;
+      margin-top: 2rem;
+    }
+
+    .reframe-box h2 { color: var(--white); }
+
+    .reframe-box p { color: rgba(255,255,255,0.7); }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+
+    .col-item {
+      padding: 1.5rem;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px;
+    }
+
+    .col-item h4 {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+      color: rgba(255,255,255,0.45);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .col-item p {
+      font-size: 0.97rem;
+      margin: 0;
+      font-weight: 300;
+      color: rgba(255,255,255,0.8);
+    }
+
+    .col-item.highlight {
+      background: rgba(42,171,145,0.18);
+      border-color: rgba(42,171,145,0.35);
+    }
+
+    .col-item.highlight h4 { color: var(--teal-light); }
+    .col-item.highlight p { color: #fff; }
+
+    /* ── SYSTEM ── */
+    .system { background: var(--cream); }
+
+    .system-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+      margin-top: 2.5rem;
+    }
+
+    .system-card {
+      background: var(--white);
+      border-radius: 12px;
+      padding: 2rem;
+      border: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+      transition: box-shadow 0.2s, transform 0.2s;
+    }
+
+    .system-card:hover {
+      box-shadow: 0 8px 32px rgba(13,61,56,0.1);
+      transform: translateY(-2px);
+    }
+
+    .system-num {
+      font-family: 'Fraunces', serif;
+      font-size: 3.5rem;
+      font-weight: 900;
+      color: var(--teal-pale);
+      line-height: 1;
+      position: absolute;
+      top: 0.8rem;
+      right: 1.5rem;
+    }
+
+    .system-label {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      color: var(--teal-mid);
+      background: var(--teal-pale);
+      padding: 0.2rem 0.65rem;
+      border-radius: 4px;
+      margin-bottom: 0.8rem;
+      border: 1px solid rgba(26,107,94,0.15);
+    }
+
+    .system-card h3 {
+      font-family: 'Fraunces', serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.01em;
+    }
+
+    .system-card p {
+      font-size: 0.88rem;
+      color: var(--ink-soft);
+      margin: 0;
+      font-weight: 300;
+    }
+
+    /* ── HOW IT WORKS ── */
+    .how { background: var(--teal-pale); }
+
+    .steps {
+      display: flex;
+      flex-direction: column;
+      margin-top: 2.5rem;
+    }
+
+    .step {
+      display: flex;
+      gap: 1.8rem;
+      align-items: flex-start;
+      padding: 2rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .step:last-child { border-bottom: none; }
+
+    .step-num {
+      font-family: 'Fraunces', serif;
+      font-size: 2.2rem;
+      font-weight: 900;
+      color: var(--teal-bright);
+      min-width: 3rem;
+      line-height: 1;
+    }
+
+    .step h3 {
+      font-family: 'Fraunces', serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 0.4rem;
+    }
+
+    .step p {
+      font-size: 0.9rem;
+      color: var(--ink-soft);
+      margin: 0;
+      font-weight: 300;
+    }
+
+    /* ── GUARANTEE ── */
+    .guarantee {
+      background: var(--teal-deep);
+      color: var(--white);
+      text-align: center;
+    }
+
+    .guarantee h2 { color: var(--white); }
+
+    .guarantee-box {
+      background: rgba(42,171,145,0.15);
+      border: 1px solid rgba(42,171,145,0.3);
+      border-radius: 16px;
+      padding: 2.5rem 3rem;
+      margin: 2rem auto 0;
+      max-width: 620px;
+    }
+
+    .guarantee-box p {
+      color: rgba(255,255,255,0.8);
+      margin: 0;
+      font-size: 1rem;
+      line-height: 1.75;
+    }
+
+    .guarantee-metric {
+      display: inline-block;
+      background: rgba(42,171,145,0.25);
+      border: 1px solid rgba(42,171,145,0.4);
+      color: var(--teal-light);
+      padding: 0.3rem 0.8rem;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      margin-top: 1.2rem;
+    }
+
+    /* ── FORM ── */
+    .form-section { background: var(--cream); }
+
+    .form-wrap {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 3rem;
+      max-width: 640px;
+      margin: 2.5rem auto 0;
+      box-shadow: 0 12px 48px rgba(13,61,56,0.09);
+    }
+
+    .form-title {
+      font-family: 'Fraunces', serif;
+      font-size: 1.5rem;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.4rem;
+      color: var(--teal-deep);
+    }
+
+    .form-sub {
+      font-size: 0.88rem;
+      color: var(--ink-muted);
+      margin-bottom: 2rem;
+      font-weight: 300;
+    }
+
+    .field { margin-bottom: 1.2rem; }
+
+    label {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--ink-soft);
+      margin-bottom: 0.45rem;
+    }
+
+    label .req { color: var(--teal-bright); }
+    label .opt { color: var(--ink-muted); font-style: italic; text-transform: none; letter-spacing: 0; font-weight: 300; }
+
+    input, textarea {
+      width: 100%;
+      padding: 0.85rem 1rem;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      background: var(--cream);
+      color: var(--ink);
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+    }
+
+    input:focus, textarea:focus {
+      border-color: var(--teal-bright);
+      box-shadow: 0 0 0 3px rgba(42,171,145,0.12);
+      background: var(--white);
+    }
+
+    textarea { resize: vertical; min-height: 80px; }
+
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+    .submit-btn {
+      width: 100%;
+      background: var(--teal-mid);
+      color: #fff;
+      border: none;
+      padding: 1.1rem;
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      margin-top: 0.5rem;
+      transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+      box-shadow: 0 4px 20px rgba(26,107,94,0.3);
+      letter-spacing: 0.01em;
+    }
+
+    .submit-btn:hover {
+      background: var(--teal-bright);
+      color: var(--teal-deep);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(42,171,145,0.4);
+    }
+
+    .form-disclaimer {
+      text-align: center;
+      font-size: 0.77rem;
+      color: var(--ink-muted);
+      margin-top: 1rem;
+      font-style: italic;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--teal-deep);
+      color: rgba(255,255,255,0.45);
+      text-align: center;
+      padding: 3rem 2rem;
+      font-size: 0.82rem;
+    }
+
+    .footer-logo {
+      font-family: 'Fraunces', serif;
+      font-weight: 900;
+      font-size: 1.3rem;
+      color: var(--white);
+      display: block;
+      margin-bottom: 0.8rem;
+      letter-spacing: -0.02em;
+    }
+
+    footer a { color: rgba(255,255,255,0.45); text-decoration: none; }
+    footer a:hover { color: var(--teal-light); }
+
+    .footer-line { margin-top: 0.5rem; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 640px) {
+      .problem-grid, .two-col, .system-grid { grid-template-columns: 1fr; }
+      .form-row { grid-template-columns: 1fr; }
+      .stats-inner { grid-template-columns: 1fr; gap: 2rem; }
+      .form-wrap { padding: 2rem 1.5rem; }
+      .reframe-box { padding: 2rem 1.5rem; }
+      .about-strip-inner { flex-direction: column; gap: 1rem; }
+      .guarantee-box { padding: 2rem 1.5rem; }
+    }
+
+    /* ── REVEAL ── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(22px);
+      transition: opacity 0.65s ease, transform 0.65s ease;
+    }
+    .reveal.visible { opacity: 1; transform: none; }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="/" class="logo">MapRank<sup>™</sup></a>
+  <a href="#audit" class="nav-cta">Get Free Audit</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-badge"><div class="dot"></div> Google Maps Performance Recovery</div>
+    <h1>Recover Lost Customers<br>from Google Maps —<br><em>Or You Don't Pay</em></h1>
+    <p class="hero-sub">I identify and fix the hidden issues in your Google Business Profile that are costing you calls, leads, and real revenue — every single day.</p>
+    <div class="hero-actions">
+      <a href="#audit" class="btn-primary">Get My Free 10-Minute Audit →</a>
+    </div>
+    <p class="hero-note" style="margin-top:1.2rem;">No credit card. No commitment. Results measured, or I keep working free.</p>
+  </div>
+</section>
+
+<!-- ABOUT STRIP — credibility without a team -->
+<div class="about-strip">
+  <div class="about-strip-inner reveal">
+    <div class="avatar">🗺️</div>
+    <div class="about-text">
+      I'm a <strong>Google Business Profile specialist</strong> focused on one thing: recovering lost visibility and calls for local U.S. businesses. I work with owners directly — no account managers, no hand-offs. You deal with the person doing the work.
+    </div>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="stats-bar">
+  <div class="stats-inner">
+    <div class="reveal">
+      <div class="stat-num">76%</div>
+      <div class="stat-label">of local searches result in a visit or call within 24 hours</div>
+    </div>
+    <div class="reveal">
+      <div class="stat-num">#1–3</div>
+      <div class="stat-label">Map Pack positions capture the vast majority of local search clicks</div>
+    </div>
+    <div class="reveal">
+      <div class="stat-num">$0</div>
+      <div class="stat-label">You pay only when measurable improvement is confirmed</div>
+    </div>
+  </div>
+</div>
+
+<!-- PROBLEM -->
+<section class="problem">
+  <div class="section-inner">
+    <div class="section-tag reveal">The Problem</div>
+    <h2 class="reveal">Your Business Is Getting Found —<br>But Customers Are <em>Choosing Competitors</em></h2>
+    <p class="reveal" style="color: var(--ink-soft); max-width:560px;">Every day, people in your area search for exactly what you offer on Google Maps. Instead of calling you, they contact someone else. Not because competitors are better — but because your listing is underperforming.</p>
+
+    <div class="problem-grid">
+      <div class="problem-card reveal">
+        <div class="problem-icon">📍</div>
+        <h3>Invisible in the Map Pack</h3>
+        <p>You're not consistently appearing in the top 3 results where the vast majority of clicks go.</p>
+      </div>
+      <div class="problem-card reveal">
+        <div class="problem-icon">⭐</div>
+        <h3>Weak Review Signals</h3>
+        <p>Competitors have stronger, more recent review profiles that build instant trust with searchers.</p>
+      </div>
+      <div class="problem-card reveal">
+        <div class="problem-icon">📞</div>
+        <h3>Listing Doesn't Convert</h3>
+        <p>Even when found, your profile isn't set up to turn views into calls. That gap is fixable.</p>
+      </div>
+      <div class="problem-card reveal">
+        <div class="problem-icon">📉</div>
+        <h3>Losses You Never See</h3>
+        <p>You're losing leads every day without realising it — because the data isn't visible until you look.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- REFRAME -->
+<section>
+  <div class="section-inner">
+    <div class="section-tag reveal">The Reframe</div>
+    <div class="reframe-box reveal">
+      <h2>This Is Not a Marketing Problem.<br>It's a Visibility + <em>Conversion Problem.</em></h2>
+      <p style="margin-top:1rem; margin-bottom:2rem; max-width:560px;">Most businesses keep running ads or hiring SEO agencies trying to "get more traffic." But your traffic already exists. People are searching for your service right now. The issue is you're not visible enough — and when you are visible, your listing isn't closing the deal.</p>
+      <div class="two-col">
+        <div class="col-item">
+          <h4>What most businesses do</h4>
+          <p>Run more ads. Pay monthly retainers. Hope something works. Never know what's actually driving results.</p>
+        </div>
+        <div class="col-item highlight">
+          <h4>What I do</h4>
+          <p>Fix the specific visibility and conversion gaps in your Google Business Profile. Measurable outcomes. You only pay when improvement is confirmed.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SYSTEM -->
+<section class="system">
+  <div class="section-inner">
+    <div class="section-tag reveal">The Solution</div>
+    <h2 class="reveal">The MapRank Capture System™</h2>
+    <p class="reveal" style="color: var(--ink-soft); max-width:540px;">A structured four-layer approach to improving your Google Maps visibility, trust signals, and conversion performance.</p>
+
+    <div class="system-grid">
+      <div class="system-card reveal">
+        <div class="system-num">01</div>
+        <div class="system-label">Visibility Layer</div>
+        <h3>Rank Where Customers Search</h3>
+        <p>I optimise your ranking signals to consistently place you in the top 3 map results for your most valuable search terms.</p>
+      </div>
+      <div class="system-card reveal">
+        <div class="system-num">02</div>
+        <div class="system-label">Trust Layer</div>
+        <h3>Build Instant Credibility</h3>
+        <p>I strengthen your review profile and credibility signals so searchers choose you over the competition without hesitation.</p>
+      </div>
+      <div class="system-card reveal">
+        <div class="system-num">03</div>
+        <div class="system-label">Conversion Layer</div>
+        <h3>Turn Views Into Calls</h3>
+        <p>Every element of your listing — photos, categories, attributes, CTAs — is optimised to maximise the percentage of visitors who contact you.</p>
+      </div>
+      <div class="system-card reveal">
+        <div class="system-num">04</div>
+        <div class="system-label">Activity Layer</div>
+        <h3>Sustain the Performance</h3>
+        <p>I maintain consistent engagement signals that tell Google your business is active, relevant, and worth ranking above competitors.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how">
+  <div class="section-inner">
+    <div class="section-tag reveal">The Offer</div>
+    <h2 class="reveal">Performance-Based Optimisation.<br><em>Zero Risk.</em></h2>
+    <p class="reveal" style="color: var(--ink-soft);">I don't sell monthly "management." I fix performance. Here's exactly how it works:</p>
+
+    <div class="steps">
+      <div class="step reveal">
+        <div class="step-num">1</div>
+        <div>
+          <h3>Free Audit of Your Google Business Profile</h3>
+          <p>I do a full diagnostic of your listing — visibility gaps, review health, conversion opportunities, competitor comparison. No fluff, just facts about what's costing you.</p>
+        </div>
+      </div>
+      <div class="step reveal">
+        <div class="step-num">2</div>
+        <div>
+          <h3>I Show You Exactly What's Costing You Customers</h3>
+          <p>You get a clear, personal video breakdown of the gaps I found. Specific. Quantified. You'll know exactly where you're losing calls and why.</p>
+        </div>
+      </div>
+      <div class="step reveal">
+        <div class="step-num">3</div>
+        <div>
+          <h3>I Optimise Your Listing — Done For You</h3>
+          <p>Full implementation across all four system layers. This is not a report you have to act on. I do the work.</p>
+        </div>
+      </div>
+      <div class="step reveal">
+        <div class="step-num">4</div>
+        <div>
+          <h3>You Pay Only When Improvement Is Confirmed</h3>
+          <p>I track GBP Search Impressions and Call Clicks via Google Business Profile Insights. Baseline set at week 1, reviewed at day 30. Measurable. Agreed upfront.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- GUARANTEE -->
+<section class="guarantee">
+  <div class="section-inner">
+    <div class="section-tag reveal" style="color: var(--teal-light);">My Commitment</div>
+    <h2 class="reveal">No Improvement = <em>No Payment</em></h2>
+    <div class="guarantee-box reveal">
+      <p>If your Google Maps visibility, inbound calls, or leads do not improve in a measurable way within 30 days, I continue working on your listing at no cost until they do. I don't get paid unless you get real results.</p>
+      <div class="guarantee-metric">📊 Tracked via GBP Insights: Search Impressions + Call Clicks — Baseline set at Week 1</div>
+    </div>
+    <div style="margin-top: 3rem;">
+      <a href="#audit" class="btn-primary reveal">See Exactly Where You're Losing Customers →</a>
+    </div>
+  </div>
+</section>
+
+<!-- FORM -->
+<section class="form-section" id="audit">
+  <div class="section-inner">
+    <div class="section-tag reveal" style="text-align:center;">Free Audit</div>
+    <h2 class="reveal" style="text-align:center;">Get Your Free Google Maps Audit</h2>
+    <p class="reveal" style="text-align:center; color: var(--ink-muted); max-width:480px; margin: 0.5rem auto 0; font-weight:300;">Takes 30 seconds. I review your profile and send you a personalised video breakdown within 24 hours.</p>
+
+    <div class="form-wrap reveal">
+      <div class="form-title">Request Your Free Audit</div>
+      <div class="form-sub">No pitch. No sales pressure. Just clarity on what's costing you customers.</div>
+
+      <form name="audit" method="POST" data-netlify="true" action="/thank-you">
+        <input type="hidden" name="form-name" value="audit" />
+
+        <div class="form-row">
+          <div class="field">
+            <label>Full Name <span class="req">*</span></label>
+            <input type="text" name="full-name" placeholder="John Smith" required />
+          </div>
+          <div class="field">
+            <label>Business Name <span class="req">*</span></label>
+            <input type="text" name="business-name" placeholder="Smith Plumbing LLC" required />
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Email Address <span class="req">*</span></label>
+          <input type="email" name="email" placeholder="john@smithplumbing.com" required />
+        </div>
+
+        <div class="field">
+          <label>Google Maps Link <span class="req">*</span></label>
+          <input type="url" name="google-maps-link" placeholder="https://maps.google.com/..." required />
+        </div>
+
+        <div class="field">
+          <label>Website <span class="opt">(optional)</span></label>
+          <input type="url" name="website" placeholder="https://yourwebsite.com" />
+        </div>
+
+        <button type="submit" class="submit-btn">Send My Free Audit →</button>
+      </form>
+
+      <p class="form-disclaimer">I respond within 24 hours. Your information is never sold or shared.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <span class="footer-logo">MapRank<sup style="font-size:0.45em; font-family:'DM Sans',sans-serif; font-weight:700; color:var(--teal-light);">™</sup></span>
+  <p>Google Maps Performance Recovery — operated by Gideon Abochie.</p>
+  <p class="footer-line" style="margin-top:0.5rem;">
+    <a href="mailto:gabochiemarketing@gmail.com">gabochiemarketing@gmail.com</a>
+    &nbsp;·&nbsp;
+    <a href="https://wa.me/233506384917" target="_blank" rel="noopener">WhatsApp</a>
+  </p>
+  <p class="footer-line" style="margin-top:0.8rem; font-size:0.76rem;">
+    <a href="/privacy">Privacy Policy</a>
+    &nbsp;·&nbsp;
+    <a href="/terms">Terms of Service</a>
+    &nbsp;·&nbsp;
+    Performance over promises.
+  </p>
+</footer>
+
+<script>
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => entry.target.classList.add('visible'), i * 55);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.08 });
+  reveals.forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>
